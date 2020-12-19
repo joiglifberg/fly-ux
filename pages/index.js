@@ -303,7 +303,7 @@ function DateSelect() {
         }`}
         onClick={() => setShowDropdown(!showDropdown)}>
         <span className="text-sm">When</span>
-        <div className="flex items-center mt-1 text-xl font-medium">
+        <div className="flex items-center mt-1 text-xl font-medium whitespace-nowrap">
           <svg
             className="w-5 h-5 mr-3"
             fill="currentColor"
