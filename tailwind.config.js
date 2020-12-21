@@ -33,7 +33,7 @@ module.exports = {
           800: "#8f8f8f",
           900: "#757575"
         },
-        "light-blue": "rgba(22, 92, 254, 0.1)"
+        "light-blue": "#e7eeff"
       },
       fontFamily: {
         sans: ["Roboto", "ui-sans-serif", "system-ui"]
