@@ -2,6 +2,11 @@ module.exports = {
   purge: ["./pages/**/*.js", "./components/**/*.js"],
   darkMode: false, // or 'media' or 'class'
   theme: {
+    container: {
+      maxWidth: {
+        "2xl": "400"
+      }
+    },
     extend: {
       colors: {
         blue: {
@@ -46,5 +51,5 @@ module.exports = {
   variants: {
     extend: {}
   },
-  plugins: []
+  plugins: [require("@tailwindcss/forms")]
 }
