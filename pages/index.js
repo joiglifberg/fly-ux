@@ -1,10 +1,17 @@
+import { Transition } from "@headlessui/react"
+import Amadeus from "amadeus"
 import differenceInDays from "date-fns/differenceInDays"
 import format from "date-fns/format"
 import isSameDay from "date-fns/isSameDay"
 import enGB from "date-fns/locale/en-GB"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import ReactDatePicker from "react-datepicker"
 import { datepicker } from "./index.module.css"
+
+const amadeus = new Amadeus({
+  clientId: "",
+  clientSecret: ""
+})
 
 function Home() {
   return (
@@ -184,25 +191,57 @@ function Home() {
 }
 
 function LocationSelect({ type, label }) {
-  const [showDropdown, setShowDropdown] = useState(false)
+  const [showSearchField, setShowSearchField] = useState(false)
+  const [searchResult, setSearchResult] = useState([])
+  const [selectedLocation, setSelectedLocation] = useState()
+  const searchFieldRef = useRef()
+
+  useEffect(() => {
+    if (selectedLocation) {
+      setShowSearchField(false)
+    }
+  }, [selectedLocation])
+
+  const onChangeSearch = async (e) => {
+    if (e.target.value.length < 3) return
+
+    console.log(e.target.value)
+
+    const result = await amadeus.referenceData.locations.get({
+      keyword: e.target.value,
+      subType: Amadeus.location.any
+    })
+    setSearchResult(result.data)
+  }
 
   return (
     <div
-      className={`flex flex-col flex-auto px-5 py-4 w-1/2 ${
-        showDropdown ? "relative text-blue-500 bg-white" : "bg-blue-500"
+      className={`relative flex flex-col px-5 py-4 flex-1 ${
+        showSearchField ? " text-blue-500 bg-white" : "bg-blue-500"
       }`}
-      onClick={() => setShowDropdown(!showDropdown)}>
-      <label htmlFor="to" className="text-sm">
+      onClick={() => setShowSearchField((state) => setShowSearchField(!state))}>
+      <label
+        htmlFor="to"
+        className="text-sm"
+        onClick={(e) =>
+          showSearchField &&
+          e.stopPropagation() &&
+          searchFieldRef.current.focus()
+        }>
         {label}
       </label>
       <div className="flex items-center justify-between">
-        {showDropdown ? (
+        {showSearchField ? (
           <>
             <input
               id={type}
               type="text"
               className="p-0 mt-1 text-xl font-medium placeholder-blue-500 border-none placeholder-opacity-20 focus:ring-0"
               placeholder="Type destination"
+              onClick={(e) => e.stopPropagation()}
+              onChange={onChangeSearch}
+              ref={searchFieldRef}
+              autoFocus
             />
             <svg
               className="w-4 h-4 transform rotate-180"
@@ -220,14 +259,18 @@ function LocationSelect({ type, label }) {
           </>
         ) : (
           <>
-            <div className="mt-1 text-xl font-medium">
-              Stockholm
-              <span className="px-2 ml-3 py-0.5 leading-none text-blue-500 bg-white rounded-2xl">
-                STO
+            <div className="flex-auto pr-3 mt-1 text-xl font-medium cursor-text">
+              <span className="overflow-hidden overflow-ellipsis whitespace-nowrap">
+                {selectedLocation?.name ?? "..."}
               </span>
+              {selectedLocation && (
+                <span className="px-2 ml-3 py-0.5 leading-none text-blue-500 bg-white rounded-2xl whitespace-nowrap">
+                  {selectedLocation.iataCode}
+                </span>
+              )}
             </div>
             <svg
-              className="w-4 h-4"
+              className="flex-none w-4 h-4"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -242,45 +285,49 @@ function LocationSelect({ type, label }) {
           </>
         )}
       </div>
-      {showDropdown && <LocationDropdown />}
+      {showSearchField && searchResult.length > 0 && (
+        <LocationDropdown
+          locations={searchResult}
+          setSelectedLocation={setSelectedLocation}
+        />
+      )}
     </div>
   )
 }
 
-function LocationDropdown() {
+function LocationDropdown({ locations, setSelectedLocation }) {
   return (
-    <div className="absolute inset-x-0 overflow-y-scroll text-black bg-white top-full max-h-64">
-      <LocationDropdownItem
-        title="Berlin (all airports)"
-        country="Germany"
-        IATA="ABC"
-      />
-      <LocationDropdownItem
-        title="Berlin, Tegel - Otto Lilienthal"
-        country="Germany"
-        IATA="DEF"
-      />
-      <LocationDropdownItem
-        title="Berlin, Brandenburg"
-        country="Germany"
-        IATA="GHI"
-      />
-      <LocationDropdownItem
-        title="Chicago, IL - O’Hare"
-        country="USA"
-        IATA="JKL"
-      />
-    </div>
+    <Transition
+      show={true}
+      appear={true}
+      enter="transition-all ease-out duration-150"
+      enterFrom="transform opacity-0 h-0"
+      enterTo="transform opacity-100 h-64"
+      className="absolute inset-x-0 overflow-y-scroll text-black bg-white top-full max-h-64">
+      {locations.map((location) => (
+        <LocationDropdownItem
+          key={location.id}
+          location={location}
+          onClick={() => setSelectedLocation(location)}
+        />
+      ))}
+    </Transition>
   )
 }
 
-function LocationDropdownItem({ title, country, IATA }) {
+function LocationDropdownItem({ location, onClick = () => {} }) {
   return (
-    <div className="flex items-start justify-between py-3 pl-5 pr-8 transition-colors border-t border-gray-600 cursor-pointer hover:bg-blue-100">
-      <span className="flex-auto mr-5 leading-7">{title}</span>
-      <div className="flex flex-col flex-none text-sm text-right">
-        <span className="leading-7">{country}</span>
-        <span className="font-bold">{IATA}</span>
+    <div
+      className="flex items-start justify-between px-5 py-3 transition-colors border-t border-gray-600 cursor-pointer pr-7 hover:bg-blue-100"
+      onClick={onClick}>
+      <span className="flex-auto mr-5 leading-7">
+        {location.name} {location.subType === "CITY" && "(all airports)"}
+      </span>
+      <div className="flex flex-col flex-grow-0 w-1/3 text-sm text-right whitespace-nowrap">
+        <span className="overflow-hidden leading-7 overflow-ellipsis">
+          {location.address.countryName}
+        </span>
+        <span className="font-bold">{location.iataCode}</span>
       </div>
     </div>
   )
@@ -288,7 +335,7 @@ function LocationDropdownItem({ title, country, IATA }) {
 
 function DateSelect() {
   const [showDropdown, setShowDropdown] = useState(false)
-  const [startDate, setStartDate] = useState(new Date())
+  const [startDate, setStartDate] = useState()
   const [endDate, setEndDate] = useState()
 
   // useEffect(() => {
@@ -317,7 +364,7 @@ function DateSelect() {
           </svg>
 
           {startDate && format(startDate, "eee, d MMM")}
-          {" - "}
+          {startDate && " - "}
           {endDate && format(endDate, "eee, d MMM")}
           {startDate &&
             endDate &&
