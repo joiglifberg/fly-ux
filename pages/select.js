@@ -1,7 +1,110 @@
+import { useState } from "react"
+
 const flights = [
   {
-    from: "Stockholm",
-    to: "Brandenburg, Berlin"
+    id: 0,
+    from: {
+      id: "STO",
+      name: "Stockholm"
+    },
+    to: {
+      id: "GHI",
+      name: "Brandenburg, Berlin"
+    },
+    departure: "7:45 AM",
+    arrival: "8:35 AM",
+    variants: [
+      {
+        id: "light",
+        name: "Economy light",
+        price: 78
+      },
+      {
+        id: "standard",
+        name: "Economy standard",
+        price: 94
+      },
+      {
+        id: "flex",
+        name: "Economy flex",
+        price: 128
+      },
+      {
+        id: "premium",
+        name: "Premium flex",
+        price: 189
+      }
+    ]
+  },
+  {
+    id: 1,
+    from: {
+      id: "GBG",
+      name: "Göteborg"
+    },
+    to: {
+      id: "CPH",
+      name: "Köpenhamn"
+    },
+    departure: "7:45 AM",
+    arrival: "8:35 AM",
+    variants: [
+      {
+        id: "light",
+        name: "Economy light",
+        price: 5
+      },
+      {
+        id: "standard",
+        name: "Economy standard",
+        price: 14
+      },
+      {
+        id: "flex",
+        name: "Economy flex",
+        price: 29
+      },
+      {
+        id: "premium",
+        name: "Premium flex",
+        price: 42
+      }
+    ]
+  },
+  {
+    id: 2,
+    from: {
+      id: "NOR",
+      name: "Norrköping"
+    },
+    to: {
+      id: "SKA",
+      name: "Skavsta"
+    },
+    departure: "7:45 AM",
+    arrival: "8:35 AM",
+    variants: [
+      {
+        id: "light",
+        name: "Economy light",
+        price: 15
+      },
+      {
+        id: "standard",
+        name: "Economy standard",
+        price: 18
+      },
+      {
+        id: "flex",
+        name: "Economy flex",
+        price: 50
+      },
+      {
+        id: "premium",
+        name: "Premium flex",
+        price: 82
+      }
+    ]
   }
 ]
 
@@ -165,12 +268,14 @@ function FlightDay() {
 }
 
 function FlightList() {
-  return (
-    <>
-      <FlightOpen />
-      <Flight />
-    </>
-  )
+  const [selectedFlight, setSelectedFlight] = useState()
+  return flights.map((flight) => (
+    <Flight
+      flight={flight}
+      key={flight.id}
+      {...{ selectedFlight, setSelectedFlight }}
+    />
+  ))
 }
 
 function FlightOpen() {
@@ -229,71 +334,6 @@ function FlightOpen() {
             <path
               fillRule="evenodd"
               d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function Flight() {
-  return (
-    <div className="relative flex flex-col pt-5 mt-5 bg-white px-7 pb-9">
-      <RoundedCorners />
-      <div className="flex items-center justify-between flex-grow">
-        <div className="text-lg">FlyUX</div>
-        <div className="px-4 py-1.5 text-sm text-blue-500 border rounded-full border-light-blue">
-          Flight info
-        </div>
-      </div>
-      <div className="flex items-center mt-10 text-center">
-        <div className="flex flex-col justify-center flex-1">
-          <div className="text-lg">Berlin, Brandenburg</div>
-          <p className="flex items-center self-center justify-center px-3 mt-1 text-xl leading-none bg-gray-500 h-7 h rounded-2xl">
-            GHI
-          </p>
-          <p className="mt-3 text-3xl">7:45 AM</p>
-          <p className="text-xl font-light">Non-stop</p>
-        </div>
-
-        <div className="flex justify-center h-16 text-gray-600">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            className="w-16 h-16">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5l7 7-7 7"
-            />
-          </svg>
-        </div>
-
-        <div className="flex flex-col justify-center flex-1">
-          <div className="text-lg">Stockholm</div>
-          <p className="flex items-center self-center justify-center px-3 mt-1 text-xl leading-none bg-gray-500 h-7 h rounded-2xl">
-            STO
-          </p>
-          <p className="mt-3 text-3xl">8:25 AM</p>
-          <p className="text-xl font-light">Non-stop</p>
-        </div>
-
-        <div className="flex flex-col items-center self-start justify-center h-32 text-xs border-2 border-blue-500 rounded-lg px-14">
-          <div className="text-xs opacity-40">From</div>
-          <p className="text-3xl leading-10 text-blue-500">£78</p>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            className="w-5 h-5 text-blue-500">
-            <path
-              fillRule="evenodd"
-              d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
               clipRule="evenodd"
             />
           </svg>
@@ -383,9 +423,285 @@ function Flight() {
           </div>
         </div>
 
+        {selectedFlight === flight.id ? (
+          <div className="flex flex-col items-center self-start py-8 text-xs border-2 rounded-lg border-light-blue bg-light-blue px-14">
+            Selected
+          </div>
+        ) : (
+          <div className="flex flex-col items-center self-start justify-center h-32 text-xs border-2 border-blue-500 rounded-lg ml-7 px-14">
+            <div className="text-xs opacity-40">From</div>
+            <p className="text-3xl leading-10 text-blue-500">£78</p>
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-row mt-12">
+        <div className="flex flex-col flex-1 px-10 py-6 bg-gray-400 rounded-lg">
+          <div className="flex flex-row items-center space-between">
+            <div className="flex flex-col flex-1">
+              <p className="text-lg font-medium leading-6">Economy light</p>
+              <p className="mt-2">Dolor amet consectetur verdo</p>
+              <div>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  className="w-5 h-5 mt-2 text-gray-800">
+                  <path
+                    fillRule="evenodd"
+                    d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+            </div>
+            <div className="items-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                className="w-5 h-5 text-blue-500">
+                <path
+                  fillRule="evenodd"
+                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+          </div>
+          <div className="pt-4 mt-5 border-t-2 border-gray-600 border-dashed">
+            <p className="text-medium">Included for each traveller</p>
+            <div className="flex items-center mt-5 text-blue-500">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                className="inline-flex w-5 h-5">
+                <path
+                  fillRule="evenodd"
+                  d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span className="ml-2.5 underline flex">1 checked bag</span>
+            </div>
+
+            <div className="flex items-center mt-5 text-blue-500">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                className="inline-flex w-5 h-5">
+                <path
+                  fillRule="evenodd"
+                  d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span className="ml-2.5 underline flex">1 carry-on-bag</span>
+            </div>
+
+            <div className="flex items-center mt-5 text-blue-500">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                className="inline-flex w-5 h-5">
+                <path
+                  fillRule="evenodd"
+                  d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span className="ml-2.5 underline flex">Seat reservation</span>
+            </div>
+          </div>
+        </div>
+
         <div className="flex flex-col items-center self-start justify-center h-32 text-xs border-2 border-blue-500 rounded-lg ml-7 px-14">
           <div className="text-xs opacity-40">From</div>
           <p className="text-3xl leading-10 text-blue-500">£78</p>
+        </div>
+      </div>
+
+      <div className="flex flex-row mt-12">
+        <div className="flex flex-col flex-1 px-10 py-6 bg-gray-400 rounded-lg">
+          <div className="flex flex-row items-center space-between">
+            <div className="flex flex-col flex-1">
+              <p className="text-lg font-medium leading-6">Economy light</p>
+              <p className="mt-2">Dolor amet consectetur verdo</p>
+              <div>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  className="w-5 h-5 mt-2 text-gray-800">
+                  <path
+                    fillRule="evenodd"
+                    d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+            </div>
+            <div className="items-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                className="w-5 h-5 text-blue-500">
+                <path
+                  fillRule="evenodd"
+                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+          </div>
+          <div className="pt-4 mt-5 border-t-2 border-gray-600 border-dashed">
+            <p className="text-medium">Included for each traveller</p>
+            <div className="flex items-center mt-5 text-blue-500">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                className="inline-flex w-5 h-5">
+                <path
+                  fillRule="evenodd"
+                  d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span className="ml-2.5 underline flex">1 checked bag</span>
+            </div>
+
+            <div className="flex items-center mt-5 text-blue-500">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                className="inline-flex w-5 h-5">
+                <path
+                  fillRule="evenodd"
+                  d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span className="ml-2.5 underline flex">1 carry-on-bag</span>
+            </div>
+
+            <div className="flex items-center mt-5 text-blue-500">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                className="inline-flex w-5 h-5">
+                <path
+                  fillRule="evenodd"
+                  d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span className="ml-2.5 underline flex">Seat reservation</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-center self-start justify-center h-32 text-xs border-2 border-blue-500 rounded-lg ml-7 px-14">
+          <div className="text-xs opacity-40">From</div>
+          <p className="text-3xl leading-10 text-blue-500">£78</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function Flight({ selectedFlight, setSelectedFlight, flight }) {
+  const handleKeyDown = (e, id) => {
+    if (e.key === "Enter") {
+      setSelectedFlight(id)
+    }
+  }
+
+  const isSelected = selectedFlight === flight.id
+  const minPrice = flight.variants.sort((a, b) =>
+    a.price > b.price ? 1 : b.price > a.price ? -1 : 0
+  )[0].price
+
+  return (
+    <div className="relative flex flex-col pt-5 mt-5 bg-white px-7 pb-9">
+      <RoundedCorners />
+      <div className="flex items-center justify-between flex-grow">
+        <div className="text-lg">FlyUX</div>
+        <div className="px-4 py-1.5 text-sm text-blue-500 border rounded-full border-light-blue">
+          Flight info
+        </div>
+      </div>
+      <div className="flex items-center mt-10 text-center">
+        <div className="flex flex-col justify-center flex-1">
+          <div className="text-lg">{flight.from.name}</div>
+          <p className="flex items-center self-center justify-center px-3 mt-1 text-xl leading-none bg-gray-500 h-7 h rounded-2xl">
+            {flight.from.id}
+          </p>
+          <p className="mt-3 text-3xl">{flight.departure}</p>
+          <p className="text-xl font-light">Non-stop</p>
+        </div>
+        <div className="flex justify-center h-16 text-gray-600">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            className="w-16 h-16">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 5l7 7-7 7"
+            />
+          </svg>
+        </div>
+        <div className="flex flex-col justify-center flex-1">
+          <div className="text-lg">{flight.to.name}</div>
+          <p className="flex items-center self-center justify-center px-3 mt-1 text-xl leading-none bg-gray-500 h-7 h rounded-2xl">
+            {flight.to.id}
+          </p>
+          <p className="mt-3 text-3xl">{flight.arrival}</p>
+          <p className="text-xl font-light">Non-stop</p>
+        </div>
+        <div
+          className={`flex flex-col items-center self-start text-xs border-2 rounded-lg h-32 w-40 justify-center transition ${
+            isSelected
+              ? "bg-light-blue border-light-blue"
+              : "border-blue-500 bg-white"
+          }`}
+          onClick={() => setSelectedFlight(flight.id)}
+          onKeyDown={(e) => handleKeyDown(e, flight.id)}
+          role="button"
+          tabIndex="0">
+          <div className="text-xs opacity-40">
+            {isSelected ? "Selected" : "From"}
+          </div>
+          <p className="text-3xl leading-10 text-blue-500">£{minPrice}</p>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            className="w-5 h-5 text-blue-500">
+            {isSelected ? (
+              <path
+                fillRule="evenodd"
+                d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z"
+                clipRule="evenodd"
+              />
+            ) : (
+              <path
+                fillRule="evenodd"
+                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                clipRule="evenodd"
+              />
+            )}
+          </svg>
         </div>
       </div>
     </div>
