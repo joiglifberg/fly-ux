@@ -9,8 +9,11 @@ import ReactDatePicker from "react-datepicker"
 import { datepicker } from "./index.module.css"
 
 const amadeus = new Amadeus({
-  clientId: "",
-  clientSecret: ""
+  clientId:
+    process.env.NEXT_PUBLIC_AMADEUS_CLIENT_ID ?? process.env.AMADEUS_CLIENT_ID,
+  clientSecret:
+    process.env.NEXT_PUBLIC_AMADEUS_CLIENT_SECRET ??
+    process.env.AMADEUS_CLIENT_SECRET
 })
 
 function Home() {
