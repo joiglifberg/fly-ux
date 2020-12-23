@@ -49,7 +49,13 @@ module.exports = {
     }
   },
   variants: {
-    extend: {}
+    extend: {
+      ringColor: ["focus-visible"],
+      ringWidth: ["focus-visible"],
+      ringOpacity: ["focus-visible"],
+      ringOffsetWidth: ["focus-visible"],
+      ringOffsetColor: ["focus-visible"]
+    }
   },
   plugins: [require("@tailwindcss/forms")]
 }
