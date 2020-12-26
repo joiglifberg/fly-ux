@@ -15,7 +15,9 @@
     "next": "10.0.3",
     "react": "17.0.1",
     "react-datepicker": "^3.3.0",
-    "react-dom": "17.0.1"
+    "react-dom": "17.0.1",
+    "use-debounce": "^5.2.0",
+    "use-onclickoutside": "^0.3.1"
   },
   "devDependencies": {
     "autoprefixer": "^10.1.0",

@@ -4,9 +4,13 @@ import differenceInDays from "date-fns/differenceInDays"
 import format from "date-fns/format"
 import isSameDay from "date-fns/isSameDay"
 import enGB from "date-fns/locale/en-GB"
+import dynamic from "next/dynamic"
 import { useEffect, useRef, useState } from "react"
-import ReactDatePicker from "react-datepicker"
+import { useDebouncedCallback } from "use-debounce"
+import useOnClickOutside from "use-onclickoutside"
 import { datepicker } from "./index.module.css"
+
+const ReactDatePicker = dynamic(() => import("react-datepicker"))
 
 const amadeus = new Amadeus({
   clientId:
@@ -16,6 +20,10 @@ const amadeus = new Amadeus({
     process.env.AMADEUS_CLIENT_SECRET
 })
 
+const isKeyCodeEnterOrSpace = (e) => {
+  return e.code === "Enter" || e.code === "Space"
+}
+
 function Home() {
   return (
     <div
@@ -24,7 +32,7 @@ function Home() {
       <div className="container mx-auto">
         <header className="flex items-center justify-between mb-32 text-white">
           <div className="flex items-center">
-            <a href="#" className="flex items-center mr-16">
+            <a href="/" className="flex items-center mr-16">
               <span className="mr-3 leading-tight">
                 <svg
                   className="w-12 h-12 transform -rotate-45"
@@ -38,7 +46,7 @@ function Home() {
             </a>
             <div className="flex text-lg font-medium">
               <a
-                href="#"
+                href="/"
                 className="flex items-center mr-10 text-white transition-colors duration-200 hover:text-opacity-80">
                 Book
                 <svg
@@ -56,12 +64,12 @@ function Home() {
                 </svg>
               </a>
               <a
-                href="#"
+                href="/"
                 className="mr-10 text-white transition-colors duration-200 hover:text-opacity-80">
                 Check-in
               </a>
               <a
-                href="#"
+                href="/"
                 className="mr-10 text-white transition-colors duration-200 hover:text-opacity-80">
                 My bookings
               </a>
@@ -71,12 +79,12 @@ function Home() {
           <div className="flex items-center">
             <div className="text-sm font-medium">
               <a
-                href="#"
+                href="/"
                 className="mr-8 text-white transition-colors duration-200 hover:text-opacity-80">
                 Travel info
               </a>
               <a
-                href="#"
+                href="/"
                 className="mr-10 text-white transition-colors duration-200 hover:text-opacity-80">
                 Support
               </a>
@@ -98,7 +106,7 @@ function Home() {
                 </svg>
               </div>
               <a
-                href="#"
+                href="/"
                 className="flex items-center h-10 px-5 text-lg text-white transition-colors duration-200 bg-black rounded-full bg-opacity-40 hover:text-opacity-80">
                 Log in
               </a>
@@ -139,9 +147,9 @@ function Home() {
             </label>
           </div>
           <div className="relative flex">
-            <div className="flex flex-auto w-1/2 mr-3">
+            <div className="flex-auto w-1/2 mr-3">
               <LocationSelect type="from" label="From" />
-              <div className="flex flex-col items-center justify-center flex-none w-5 bg-blue-700">
+              <div className="flex flex-col items-center justify-center flex-none float-left w-5 h-full bg-blue-700 ">
                 <svg
                   className="w-5 h-5 opacity-60"
                   fill="currentColor"
@@ -154,7 +162,7 @@ function Home() {
             </div>
             <DateSelect />
 
-            <label
+            <div
               className="flex flex-col flex-auto px-5 py-4 mr-3 bg-blue-500"
               style={{ width: "15%" }}>
               <span className="text-sm">Travellers</span>
@@ -185,7 +193,7 @@ function Home() {
                   />
                 </svg>
               </div>
-            </label>
+            </div>
           </div>
         </div>
       </div>
@@ -198,20 +206,28 @@ function LocationSelect({ type, label }) {
   const [searchResult, setSearchResult] = useState([])
   const [selectedLocation, setSelectedLocation] = useState()
   const searchFieldRef = useRef()
+  const locationSelectRef = useRef()
+
+  useOnClickOutside(locationSelectRef, () => setShowSearchField(false))
+
+  const debouncedSearchOnChange = useDebouncedCallback((value) => {
+    if (value.length < 3) return
+    debouncedSearchOnChange.cancel()
+
+    searchLocations(value)
+  }, 200)
 
   useEffect(() => {
-    if (selectedLocation) {
-      setShowSearchField(false)
-    }
+    selectedLocation && setShowSearchField(false)
   }, [selectedLocation])
 
-  const onChangeSearch = async (e) => {
-    if (e.target.value.length < 3) return
+  useEffect(() => {
+    showSearchField && searchFieldRef.current.focus()
+  }, [showSearchField])
 
-    console.log(e.target.value)
-
+  const searchLocations = async (value) => {
     const result = await amadeus.referenceData.locations.get({
-      keyword: e.target.value,
+      keyword: value,
       subType: Amadeus.location.any
     })
     setSearchResult(result.data)
@@ -219,75 +235,59 @@ function LocationSelect({ type, label }) {
 
   return (
     <div
-      className={`relative flex flex-col px-5 py-4 flex-1 ${
+      style={{ width: "calc(50% - 10px)" }}
+      className={`float-left relative flex flex-col px-5 py-4 transition-colors ${
         showSearchField ? " text-blue-500 bg-white" : "bg-blue-500"
       }`}
-      onClick={() => setShowSearchField((state) => setShowSearchField(!state))}>
-      <label
-        htmlFor="to"
-        className="text-sm"
-        onClick={(e) =>
-          showSearchField &&
-          e.stopPropagation() &&
-          searchFieldRef.current.focus()
-        }>
+      ref={locationSelectRef}>
+      <button
+        className="text-sm text-left"
+        onClick={(e) => setShowSearchField(true) && e.stopPropagation()}>
         {label}
-      </label>
+      </button>
       <div className="flex items-center justify-between">
         {showSearchField ? (
-          <>
-            <input
-              id={type}
-              type="text"
-              className="p-0 mt-1 text-xl font-medium placeholder-blue-500 border-none placeholder-opacity-20 focus:ring-0"
-              placeholder="Type destination"
-              onClick={(e) => e.stopPropagation()}
-              onChange={onChangeSearch}
-              ref={searchFieldRef}
-              autoFocus
-            />
-            <svg
-              className="w-4 h-4 transform rotate-180"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={3}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          </>
+          <input
+            id={type}
+            type="text"
+            className="p-0 mt-1 text-xl font-medium placeholder-blue-500 border-none placeholder-opacity-20 focus:ring-0"
+            placeholder="Type destination"
+            onClick={(e) => e.stopPropagation()}
+            onChange={(e) => debouncedSearchOnChange.callback(e.target.value)}
+            ref={searchFieldRef}
+          />
         ) : (
-          <>
-            <div className="flex-auto pr-3 mt-1 text-xl font-medium cursor-text">
-              <span className="overflow-hidden overflow-ellipsis whitespace-nowrap">
-                {selectedLocation?.name ?? "..."}
+          <button
+            className="flex-auto pr-3 mt-1 text-xl font-medium text-left cursor-text"
+            onClick={() => setShowSearchField(true)}>
+            <span className="overflow-hidden overflow-ellipsis whitespace-nowrap">
+              {selectedLocation?.name ?? "..."}
+            </span>
+            {selectedLocation && (
+              <span className="px-2 ml-3 py-0.5 leading-none text-blue-500 bg-white rounded-2xl whitespace-nowrap">
+                {selectedLocation.iataCode}
               </span>
-              {selectedLocation && (
-                <span className="px-2 ml-3 py-0.5 leading-none text-blue-500 bg-white rounded-2xl whitespace-nowrap">
-                  {selectedLocation.iataCode}
-                </span>
-              )}
-            </div>
-            <svg
-              className="flex-none w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={3}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          </>
+            )}
+          </button>
         )}
+
+        <svg
+          className={`w-4 h-4 transition-transform ${
+            showSearchField ? "transform duration-200 rotate-180" : ""
+          }`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={3}
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
       </div>
+
       {showSearchField && searchResult.length > 0 && (
         <LocationDropdown
           locations={searchResult}
@@ -320,9 +320,11 @@ function LocationDropdown({ locations, setSelectedLocation }) {
 
 function LocationDropdownItem({ location, onClick = () => {} }) {
   return (
-    <div
+    <button
+      tabIndex={0}
       className="flex items-start justify-between px-5 py-3 transition-colors border-t border-gray-600 cursor-pointer pr-7 hover:bg-blue-100"
-      onClick={onClick}>
+      onClick={onClick}
+      onKeyDown={(e) => isKeyCodeEnterOrSpace(e) && onClick(e)}>
       <span className="flex-auto mr-5 leading-7">
         {location.name} {location.subType === "CITY" && "(all airports)"}
       </span>
@@ -332,7 +334,7 @@ function LocationDropdownItem({ location, onClick = () => {} }) {
         </span>
         <span className="font-bold">{location.iataCode}</span>
       </div>
-    </div>
+    </button>
   )
 }
 
@@ -340,10 +342,8 @@ function DateSelect() {
   const [showDropdown, setShowDropdown] = useState(false)
   const [startDate, setStartDate] = useState()
   const [endDate, setEndDate] = useState()
-
-  // useEffect(() => {
-  //   setEndDate(null)
-  // }, [startDate])
+  const dateSelectRef = useRef()
+  useOnClickOutside(dateSelectRef, () => setShowDropdown(false))
 
   return (
     <>
@@ -351,7 +351,13 @@ function DateSelect() {
         className={`flex flex-col flex-auto w-1/3 px-5 py-4 mr-3 ${
           showDropdown ? "relative text-blue-500 bg-white" : "bg-blue-500"
         }`}
-        onClick={() => setShowDropdown(!showDropdown)}>
+        onClick={() => setShowDropdown(!showDropdown)}
+        onKeyDown={(e) =>
+          isKeyCodeEnterOrSpace(e) && setShowDropdown(!showDropdown)
+        }
+        role="button"
+        tabIndex={0}
+        ref={dateSelectRef}>
         <span className="text-sm">When</span>
         <div className="flex items-center mt-1 text-xl font-medium whitespace-nowrap">
           <svg
