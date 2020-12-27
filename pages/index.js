@@ -165,7 +165,9 @@ function Home() {
             <div
               className="flex flex-col flex-auto px-5 py-4 mr-3 bg-blue-500"
               style={{ width: "15%" }}>
-              <span className="text-sm">Travellers</span>
+              <label htmlFor="travellers" className="text-sm">
+                Travellers
+              </label>
               <div className="flex items-center mt-1 text-xl font-medium">
                 <svg
                   className="w-5 h-5 mr-2"
@@ -178,20 +180,19 @@ function Home() {
                     clipRule="evenodd"
                   />
                 </svg>
-                <span className="flex-auto">1</span>
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={3}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
+                <select
+                  id="travellers"
+                  className="flex-auto p-0 text-xl bg-blue-500 border-none appearance-none">
+                  <option>1</option>
+                  <option>2</option>
+                  <option>3</option>
+                  <option>4</option>
+                  <option>5</option>
+                  <option>6</option>
+                  <option>7</option>
+                  <option>8</option>
+                  <option>9</option>
+                </select>
               </div>
             </div>
           </div>
